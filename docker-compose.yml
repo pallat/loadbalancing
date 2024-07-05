@@ -1,0 +1,48 @@
+version: '3'
+services:
+  backend_1:
+    build: ./server   
+    environment:
+      - PORT=8080
+      - TAG=1
+    networks:
+      - loadbalancing
+  backend_2:
+    build: ./server
+    environment:
+      - PORT=8080
+      - TAG=2
+    networks:
+      - loadbalancing
+  backend_3:
+    build: ./server  
+    environment:
+      - PORT=8080
+      - TAG=3
+    networks:
+      - loadbalancing
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    networks:
+      - loadbalancing
+    depends_on:
+      - backend_1
+      - backend_2
+      - backend_3
+
+  redis:
+    restart: always
+    image: "redis:latest"
+    container_name: incubator-redis
+    ports:
+      - "6379:6379"
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    ports:
+      - "8001:8001"
+
+networks:
+  loadbalancing:
